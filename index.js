@@ -17,7 +17,6 @@ const ADMIN_API_URL = `https://${process.env.SHOPIFY_SHOP_NAME}/admin/api/2024-1
 const ADMIN_TOKEN = process.env.SHOPIFY_ADMIN_TOKEN;
 
 // ============= HELPER FUNCTIONS =============
-
 async function makeGraphQLRequest(query) {
     try {
         const response = await axios.post(
@@ -203,7 +202,6 @@ async function getOrCreateMetafieldTranslation(productId, namespace, key, target
             }
         }
 
-        console.log('Attempting GraphQL mutation...');
         const mutationResult = await createTranslationWithMutation(
             productId, namespace, key, originalValue, targetLocale
         );
@@ -232,7 +230,6 @@ async function getOrCreateMetafieldTranslation(productId, namespace, key, target
 }
 
 // ============= ENDPOINTS =============
-
 app.post('/api/get-metafield', async (req, res) => {
     try {
         const response = await axios.post(
