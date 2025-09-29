@@ -322,7 +322,6 @@ app.post('/api/get-translated-metafield', async (req, res) => {
 
 // Endpoint to get original metafield value
 
-
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
