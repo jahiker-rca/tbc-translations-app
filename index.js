@@ -165,42 +165,6 @@ async function createTranslation(productId, namespace, key, translatedValue, tar
     }
 }
 
-
-// Function to register translation in Shopify (REST fallback)
-async function registerTranslationInShopify(productId, namespace, key, translatedValue, targetLocale) {
-    try {
-        const numericId = productId.replace('gid://shopify/Product/', '');
-        const metafieldKey = `metafields.${namespace}.${key}`;
-
-        const translationData = {
-            "translation": {
-                "locale": targetLocale,
-                "key": metafieldKey,
-                "value": translatedValue,
-                "translatable_id": parseInt(numericId),
-                "translatable_type": "Product"
-            }
-        };
-
-        const response = await axios.post(
-            `${ADMIN_API_URL}/translations.json`,
-            translationData,
-            {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Shopify-Access-Token': ADMIN_TOKEN
-                }
-            }
-        );
-
-        console.log('Translation registered successfully via REST');
-        return response.data;
-    } catch (error) {
-        console.log('REST translation registration failed:', error.response?.status, error.response?.data);
-        return null;
-    }
-}
-
 // Function to trigger auto-translation using different endpoints
 async function triggerTranslateAndAdapt(productId, targetLocale = 'de') {
     const numericId = productId.replace('gid://shopify/Product/', '');
@@ -309,23 +273,7 @@ async function getOrCreateMetafieldTranslation(productId, namespace, key, target
             };
         }
 
-        // 6. If GraphQL fails, try REST API as fallback
-        console.log('GraphQL failed, trying REST API...');
-        const restResult = await registerTranslationInShopify(
-            productId, namespace, key, googleTranslatedValue, targetLocale
-        );
-
-        if (restResult) {
-            return {
-                value: googleTranslatedValue,
-                locale: targetLocale,
-                isTranslated: true,
-                source: 'google_translate_registered_rest',
-                message: 'Translation created with Google Translate and registered in Shopify via REST'
-            };
-        }
-
-        // 7. If all registration attempts fail, return Google translation anyway
+        // 6. If all registration attempts fail, return Google translation anyway
         return {
             value: googleTranslatedValue,
             locale: targetLocale,
