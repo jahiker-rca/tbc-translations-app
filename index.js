@@ -38,54 +38,25 @@ async function makeGraphQLRequest(query) {
 // Function to trigger auto-translation using different endpoints
 async function triggerTranslateAndAdapt(productId, targetLocale = 'de') {
     const numericId = productId.replace('gid://shopify/Product/', '');
-
-    const endpoints = [
-        {
-            url: `${ADMIN_API_URL}/translations/auto_translate.json`,
-            data: {
-                "resource_id": `gid://shopify/Product/${numericId}`,
-                "locale": targetLocale,
-                "translate_all": true
+    const url = `${ADMIN_API_URL}/translatable_resources/${numericId}/translations.json`;
+    const data = {
+        "locale": targetLocale,
+        "auto_translate": true
+    };
+    try {
+        console.log(`Trying endpoint: ${url}`);
+        const response = await axios.post(url, data, {
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Shopify-Access-Token': ADMIN_TOKEN
             }
-        },
-        {
-            url: `${ADMIN_API_URL}/translations/auto_translate.json`,
-            data: {
-                "auto_translate": {
-                    "resource_id": `gid://shopify/Product/${numericId}`,
-                    "locale": targetLocale,
-                    "translate_all": true
-                }
-            }
-        },
-        {
-            url: `${ADMIN_API_URL}/translatable_resources/${numericId}/translations.json`,
-            data: {
-                "locale": targetLocale,
-                "auto_translate": true
-            }
-        }
-    ];
-
-    for (const endpoint of endpoints) {
-        try {
-            console.log(`Trying endpoint: ${endpoint.url}`);
-            const response = await axios.post(endpoint.url, endpoint.data, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Shopify-Access-Token': ADMIN_TOKEN
-                }
-            });
-
-            console.log(`Success with endpoint: ${endpoint.url}`);
-            return response.data;
-        } catch (error) {
-            console.log(`Failed endpoint ${endpoint.url}: ${error.response?.status} - ${error.message}`);
-            continue;
-        }
+        });
+        console.log(`Success with endpoint: ${url}`);
+        return response.data;
+    } catch (error) {
+        console.log(`Failed endpoint ${url}: ${error.response?.status} - ${error.message}`);
+        return null;
     }
-
-    return null;
 }
 
 // Function to create translation using GraphQL mutations (if available)
